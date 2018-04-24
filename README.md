@@ -42,10 +42,10 @@ Completing the entire ecosystem might take infinitely long. However, I should be
 
 |Week|In Class|At Home|
 |--|--|--|
-|5/7 - 5/11|Extract hand image|Identify hand position|
-|5/14 - 5/18|Extract hand skeleton|Recognize gesture|
-|5/21 - 5/25|Porting to Objective-C++|Implement native iOS UI|
-|5/29 - 6/7|Presentation|Final adjustment|
+|5/1 - 5/7|Extract hand image|Identify hand position|
+|5/8 - 5/13|Extract hand skeleton|Recognize gesture|
+|5/14 - 5/21|Porting to Objective-C++|Implement native iOS UI|
+|5/22 - 5/31|Presentation|Final adjustment|
 |Future|N/A|Improve accuracy|
 
 ## License
@@ -70,4 +70,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ----
 
-2018/03/09 Ver.
+2018/03/09 Ver. (Update Apr. 24)
+
+<script type="text/javascript">
+  window.onload = function () {
+    document.getElementById("augma").style.display="none";
+  }
+</script>
