@@ -34,11 +34,11 @@ A quick google search with "hand gesture recognition" yields many YouTube videos
 
 ## Personal Goal
 
-Once finished, the source code, presentation, and documentation will be made available on [GitHub](https://github.com/ApolloZhu/Augma) under [GNU General Public License](https://github.com/ApolloZhu/Augma/blob/master/LICENSE). But more importantly, this project will introduce me to the OpenCV framework, the Objective-C++ programming language, and computer vision (object recognition specifically). Additionally, getting familiar with C++ will prepare me for further studying into lower level computer systems.
+Once finished, the source code, presentation, and documentation will be made available on GitHub at [https://github.com/ApolloZhu/Augma](https://github.com/ApolloZhu/Augma) under [GNU General Public License](https://github.com/ApolloZhu/Augma/blob/master/LICENSE). But more importantly, this project will introduce me to the OpenCV framework, the Objective-C++ programming language, and computer vision (object recognition specifically). Additionally, getting familiar with C++ will prepare me for further studying into lower level computer systems.
 
 ## Timeline
 
-Completing the entire ecosystem might take infinitely long. However, I should be able to complete stage 1 within the given time frame (with full dedication). The following milestones are the expected time frame organized by weeks in stage one, and the actual progress and tasks will be organized through this [Kanban](https://github.com/ApolloZhu/Augma/projects/1).
+Completing the entire ecosystem might take infinitely long. However, I should be able to complete stage 1 within the given time frame (with full dedication). The following milestones are the expected time frame organized by weeks in stage one, and the actual progress and tasks will be organized through this Kanban at [https://github.com/ApolloZhu/Augma/projects/1](https://github.com/ApolloZhu/Augma/projects/1).
 
 |Week|In Class|At Home|
 |--|--|--|
