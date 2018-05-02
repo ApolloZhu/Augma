@@ -70,7 +70,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ----
 
-2018/03/09 Ver. (Update Apr. 24)
+2018/03/09 Ver. (Update May 2)
 
 <script type="text/javascript">
   window.onload = function () {
