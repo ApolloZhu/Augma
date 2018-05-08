@@ -1,7 +1,9 @@
 import cv2
-import numpy as np
 
-a = cv2.imread('img.JPG')
-cv2.imshow("Display", a)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+camera = cv2.VideoCapture(0)
+
+while camera.isOpened():
+    rect, frame = camera.read()
+    print(rect)
+    cv2.imshow('original', frame)
+
