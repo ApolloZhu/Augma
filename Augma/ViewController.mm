@@ -1,4 +1,4 @@
-//
+ //
 //  ViewController.m
 //  Augma
 //
@@ -43,14 +43,14 @@ const cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cvSize(3, 3)
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
     // Setting history to 0 since we don't want hands to be considered as background.
-    // TODO: Try `0, 50, false`.
+    #warning Try `0, 50, false`.
     backgroundRemover = cv::createBackgroundSubtractorMOG2();
     self.videoCamera.delegate = self;
     [self.videoCamera start];
 }
 
 - (void)processImage:(cv::Mat &)image {
-    // TODO: Convert to YCC to have better differentiation of colors.
+    #warning Convert to YCC to have better differentiation of colors.
     // And for the background remover to work.
     cv::Mat temp;
     cv::cvtColor(image, temp, CV_RGB2YCrCb);
@@ -67,6 +67,33 @@ const cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cvSize(3, 3)
     // and save the result back to image.
     cv::morphologyEx(foregroundMask, filtered, cv::MORPH_OPEN, kernel);
 
+    #warning Test the gaussian blur, or just blur
+    cv::GaussianBlur(filtered, filtered, cvSize(5, 5), 100);
+    
+    #warning Use threshold if we know what color to filter out
+
+    // Find the largest contour (assuming that would be the hand).
+    // Contour: connected area.
+    std::vector<Point> largestContour;
+    double largestContourArea = -1;
+    std::vector<std::vector<Point>> contours;
+    cv::findContours(filtered, contours, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
+    for (std::vector<Point> contour : contours) {
+        double area = fabs(cv::contourArea(contour));
+        if (area > largestContourArea) {
+            largestContourArea = area;
+            largestContour = contour;
+        }
+    }
+    
+    // Find a polygon around the hand.
+    std::vector<Point> hulls;
+    cv::convexHull(largestContour, hulls);
+    
+    // Finding the fingers.
+    std::vector<std::vector<cv::Vec4i>> defects;
+    cv::convexityDefects(cv::Mat(largestContour), hulls, defects);
+    
     // MARK: Display
 
     // Convert to displayable image.
