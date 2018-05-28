@@ -13,7 +13,7 @@
  [1, 1, 1],
  [0, 1, 0]
  ], which will result in smooth edges. */
-const cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cvSize(3, 3));
+const cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cvSize(10, 10));
 
 @interface ViewController ()
     // Capture the video from back camera.
@@ -24,9 +24,7 @@ const cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cvSize(3, 3)
     @property (nonatomic, retain) AVCapturePhotoOutput* photoOutput;
     @end
 
-@implementation ViewController {
-    cv::Ptr<cv::BackgroundSubtractorMOG2> backgroundRemover;
-}
+@implementation ViewController
     
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -53,73 +51,85 @@ const cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cvSize(3, 3)
     [self.captureSession addOutput:videoOutput];
     AVCaptureDepthDataOutput* depthOutput = [[AVCaptureDepthDataOutput alloc] init];
     [depthOutput setDelegate: self callbackQueue: queue];
-    [depthOutput setFilteringEnabled:true];
+    [depthOutput setFilteringEnabled:YES];
     [self.captureSession addOutput:depthOutput];
-    /*
-     
-     
-     let outputRect = CGRect(x: 0, y: 0, width: 1, height: 1)
-     let videoRect = videoOutput.outputRectConverted(fromMetadataOutputRect: outputRect)
-     let depthRect = depthOutput.outputRectConverted(fromMetadataOutputRect: outputRect)
-     
-     scale = max(videoRect.width, videoRect.height) / max(depthRect.width, depthRect.height)
-     
-     do {
-     try camera.lockForConfiguration()
-     
-     if let frameDuration = camera.activeDepthDataFormat?
-     .videoSupportedFrameRateRanges.first?.minFrameDuration {
-     camera.activeVideoMinFrameDuration = frameDuration
-     }
-     
-     camera.unlockForConfiguration()
-     } catch {
-     fatalError(error.localizedDescription)
-     }
-     }
-     */
-    
-    
-    //    self.photoOutput = [[AVCapturePhotoOutput alloc] init];
-    //    [self.captureSession canAddOutput:self.photoOutput];
-    //    [self.captureSession addOutput:self.photoOutput];
-    //    [self.photoOutput setDepthDataDeliveryEnabled:YES];
     [self.captureSession commitConfiguration];
-    
-    //    NSArray<AVCaptureDeviceFormat *> *availableFormats = videoDevice.formats;
-    //    NSUInteger loc = [availableFormats indexOfObjectPassingTest:^BOOL(AVCaptureDeviceFormat * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-    //        FourCharCode pixelFormatType = CMFormatDescriptionGetMediaSubType(obj.formatDescription);
-    //        BOOL result = pixelFormatType == kCVPixelFormatType_DepthFloat16
-    //        || pixelFormatType == kCVPixelFormatType_DepthFloat32;
-    //        NSLog(result ? @"Yes" : @"No");
-    //        return result;
-    //    }];
-    //
-    //    [self.captureSession beginConfiguration];
-    //    videoDevice.activeDepthDataFormat = availableFormats[loc];
-    //    [self.captureSession commitConfiguration];
-    
     [self.captureSession startRunning];
-    
-    //    self.videoCamera = [CvVideoCamera new];
-    //    self.videoCamera.defaultAVCaptureDevicePosition = AVCaptureDevicePositionBack;
-    //    self.videoCamera.defaultAVCaptureVideoOrientation = AVCaptureVideoOrientationPortrait;
-    //    self.videoCamera.defaultAVCaptureSessionPreset = AVCaptureSessionPresetHigh;
-}
-    
-- (void)viewDidAppear:(BOOL)animated {
-    [super viewDidAppear:animated];
-    // Setting history to 0 since we don't want hands to be considered as background.
-    //    #warning Try `0, 50, false`.
-    //    backgroundRemover = cv::createBackgroundSubtractorMOG2();
-    //    self.videoCamera.delegate = self;
-    //    [self.videoCamera start];
 }
     
 - (void)depthDataOutput:(AVCaptureDepthDataOutput *)output didOutputDepthData:(AVDepthData *)depthData timestamp:(CMTime)timestamp connection:(AVCaptureConnection *)connection {
     [connection setVideoOrientation:AVCaptureVideoOrientationPortrait];
     CIImage* ciImage = [[CIImage alloc] initWithCVPixelBuffer:depthData.depthDataMap];
     UIImage* uiImage = [[UIImage alloc] initWithCIImage:ciImage scale:1 orientation:UIImageOrientationUp];
+    UIGraphicsBeginImageContext(uiImage.size);
+    [uiImage drawInRect:CGRectMake(0, 0, uiImage.size.width, uiImage.size.height)];
+    UIImage* copy = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    cv::Mat mat;
+    UIImageToMat(copy, mat);
+    [self processImage:mat];
+}
+    
+- (void)processImage:(cv::Mat &)image {
+    try {
+        cv::cvtColor(image, image, CV_RGBA2GRAY);
+        cv::threshold(image, image,250, 255, CV_THRESH_BINARY);
+        // Erode and dilate with mask and kernel to remove noise,
+        // and save the result back to image.
+        // cv::morphologyEx(image, image, cv::MORPH_OPEN, kernel);
+        // Find the largest contour (assuming that would be the hand).
+        // Contour: connected area.
+        std::vector<cv::Point> largestContour;
+        double largestContourArea = -1;
+        int largestContourIndex = 0;
+        std::vector<std::vector<cv::Point>> contours;
+        cv::findContours(image, contours, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
+        for (int i = 0;i<contours.size();i++) {
+            std::vector<cv::Point> contour = contours[i];
+            double area = fabs(cv::contourArea(contour));
+            if (area > largestContourArea) {
+                largestContourArea = area;
+                largestContour = contour;
+                largestContourIndex = i;
+            }
+        }
+        
+        // cv::approxPolyDP(largestContour, largestContour, 3, true);
+        
+        cv::cvtColor(image, image, CV_GRAY2RGB);
+        cv::Scalar color = cv::Scalar(255, 0, 0);
+        cv::drawContours(image, contours, largestContourIndex, color);
+        
+        // Find a polygon around the hand.
+        std::vector<std::vector<cv::Point>> hulls(1);
+        cv::convexHull(largestContour, hulls[0]);
+        
+        color = cv::Scalar(0, 255, 0);
+        cv::drawContours(image, hulls, 0, color);
+        try {
+            // Finding the fingers.
+            std::vector<std::vector<cv::Vec4i>> defects(1);
+            cv::convexityDefects(largestContour, hulls[0], defects[0]);
+            color = cv::Scalar(0, 0, 255);
+            for (cv::Vec4i defect : defects[0]) {
+                cv::Point start = hulls[0][defect[0]];
+                cv::Point end = hulls[0][defect[1]];
+                cv::Point far = hulls[0][defect[2]];
+                float distance = defect[3] / 256.0;
+                cv::line(image, start, end, color);
+                cv::line(image, end, far, color);
+                cv::line(image, far, start, color);
+                cv::circle(image, far, distance, color);
+            }
+        } catch (std::exception& e) {
+            std::cout << e.what() << std::endl;
+        }
+    } catch (std::exception& e) {
+    }
+    // MARK: Display
+    // Convert to displayable image.
+    UIImage *uiImage = MatToUIImage(image);
+    // Switch to main thread for UI update.
     __weak ViewController *weakSelf = self;
     dispatch_async(dispatch_get_main_queue(), ^{
         ViewController *strongSelf = weakSelf;
@@ -128,75 +138,4 @@ const cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cvSize(3, 3)
     });
 }
     
-    //- (void)capture {
-    //    AVCapturePhotoSettings* photoSettings = [AVCapturePhotoSettings photoSettings];
-    //    [photoSettings setDepthDataDeliveryEnabled:YES];
-    //    // Shoot the photo, using a custom class to handle capture delegate callbacks.
-    //    [self.photoOutput capturePhotoWithSettings:photoSettings delegate:self];
-    //}
-    //
-    //- (void)captureOutput:(AVCapturePhotoOutput *)output didFinishProcessingPhoto:(AVCapturePhoto *)photo error:(NSError *)error {
-    //    AVDepthData* data = photo.depthData;
-    //    CVPixelBufferRef pixels = data.depthDataMap;
-    //    NSLog(@"HI");
-    //
-    //}
-    
-    //- (void)processImage:(cv::Mat &)image {
-    //    #warning Convert to YCC to have better differentiation of colors.
-    //    // And for the background remover to work.
-    //    cv::Mat temp;
-    //    cv::cvtColor(image, temp, CV_RGB2YCrCb);
-    //
-    //    // Reduce noise while keeping sharp edges. (Slow algorithm)
-    //    cv::Mat filtered;
-    //    filtered = image;
-    //    // cv::bilateralFilter(temp, filtered, /*recommended*/ 5, /*random values*/50, 100);
-    //    // Get the mask if we remove the background.
-    //    cv::Mat foregroundMask;
-    //    backgroundRemover->apply(filtered, foregroundMask);
-    //
-    //    // Erode and dilate with mask and kernel to remove noise,
-    //    // and save the result back to image.
-    //    cv::morphologyEx(foregroundMask, filtered, cv::MORPH_OPEN, kernel);
-    //
-    //    #warning Test the gaussian blur, or just blur
-    //    cv::GaussianBlur(filtered, filtered, cvSize(5, 5), 100);
-    //
-    //    #warning Use threshold if we know what color to filter out
-    //
-    //    // Find the largest contour (assuming that would be the hand).
-    //    // Contour: connected area.
-    //    std::vector<Point> largestContour;
-    //    double largestContourArea = -1;
-    //    std::vector<std::vector<Point>> contours;
-    //    cv::findContours(filtered, contours, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
-    //    for (std::vector<Point> contour : contours) {
-    //        double area = fabs(cv::contourArea(contour));
-    //        if (area > largestContourArea) {
-    //            largestContourArea = area;
-    //            largestContour = contour;
-    //        }
-    //    }
-    //
-    //    // Find a polygon around the hand.
-    //    std::vector<Point> hulls;
-    //    cv::convexHull(largestContour, hulls);
-    //
-    //    // Finding the fingers.
-    //    std::vector<std::vector<cv::Vec4i>> defects;
-    //    cv::convexityDefects(cv::Mat(largestContour), hulls, defects);
-    //
-    //    // MARK: Display
-    //
-    //    // Convert to displayable image.
-    //    UIImage *uiImage = MatToUIImage(filtered);
-    //    // Switch to main thread for UI update.
-    //    __weak ViewController *weakSelf = self;
-    //    dispatch_async(dispatch_get_main_queue(), ^{
-    //        ViewController *strongSelf = weakSelf;
-    //        // Show the image.
-    //        [strongSelf.imageView setImage:uiImage];
-    //    });
-    //}
-@end
+    @end
