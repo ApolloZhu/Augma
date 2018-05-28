@@ -17,7 +17,8 @@ const cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cvSize(10, 1
 
 @interface ViewController ()
     // Display the transformed images.
-    @property (nonatomic, weak) UIImageView *imageView;
+    @property (nonatomic, retain) UIImageView *imageView;
+    @property (nonatomic, retain) UILabel *label;
     @property (nonatomic, retain) AVCaptureSession *captureSession;
     @property (nonatomic, retain) AVCapturePhotoOutput *photoOutput;
     @end
@@ -30,15 +31,23 @@ const cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cvSize(10, 1
     
 - (void)viewDidLoad {
     [super viewDidLoad];
+    // MARK: Layout Contents
+    self.imageView = [[UIImageView alloc] initWithFrame:self.view.bounds];
+    [self.view addSubview:self.imageView];
+    self.imageView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    self.label = [[UILabel alloc] init];
+    [self.view addSubview:self.label];
+    [self.label setTranslatesAutoresizingMaskIntoConstraints:false];
+    [self.label setTextAlignment:NSTextAlignmentCenter];
+    [self.label setTextColor:UIColor.whiteColor];
+    [self.label setFont:[UIFont preferredFontForTextStyle:UIFontTextStyleLargeTitle]];
+    [NSLayoutConstraint activateConstraints:@[
+        [self.view.widthAnchor constraintEqualToAnchor:self.label.widthAnchor],
+        [self.view.centerXAnchor constraintEqualToAnchor:self.label.centerXAnchor],
+        [self.view.safeAreaLayoutGuide.topAnchor constraintEqualToAnchor:self.label.topAnchor],
+    ]];
     
-    NSLog(@"%f", UIScreen.mainScreen.scale);
-    
-    UIImageView *imageView = [[UIImageView alloc] initWithFrame:self.view.bounds];
-    [self.view addSubview:imageView];
-    imageView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    self.imageView = imageView;
-    
-    // Select a depth-capable capture device.
+    // MARK: Select a depth-capable capture device
     AVCaptureDevice *videoDevice = [AVCaptureDevice
                                     defaultDeviceWithDeviceType:AVCaptureDeviceTypeBuiltInDualCamera
                                     mediaType:AVMediaTypeVideo
@@ -46,23 +55,24 @@ const cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cvSize(10, 1
     AVCaptureDeviceInput *videoDeviceInput = [[AVCaptureDeviceInput alloc] initWithDevice:videoDevice error:NULL];
     self.captureSession = [[AVCaptureSession alloc] init];
     [self.captureSession beginConfiguration];
+    // MARK: Capture the video from back camera
     [self.captureSession setSessionPreset:AVCaptureSessionPresetPhoto];
     [self.captureSession addInput:videoDeviceInput];
-    
+    // MARK: Get Video Frames
     AVCaptureVideoDataOutput *videoOutput = [[AVCaptureVideoDataOutput alloc] init];
     dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0);
     [videoOutput setSampleBufferDelegate:self queue:queue];
-    /// videoOutput.videoSettings = [kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA]
     [self.captureSession addOutput:videoOutput];
+    // MARK: Get Depth Data
     AVCaptureDepthDataOutput *depthOutput = [[AVCaptureDepthDataOutput alloc] init];
     [depthOutput setDelegate: self callbackQueue: queue];
     [depthOutput setFilteringEnabled:YES];
     [self.captureSession addOutput:depthOutput];
+    
     [self.captureSession commitConfiguration];
-    // Capture the video from back camera.
     [self.captureSession startRunning];
 }
-
+    
 - (void)captureOutput:(AVCaptureOutput *)output didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection {
     [connection setVideoOrientation:AVCaptureVideoOrientationPortrait];
     CVPixelBufferRef pixels = CMSampleBufferGetImageBuffer(sampleBuffer);
@@ -94,7 +104,19 @@ const cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cvSize(10, 1
                      MIN(MAX(point.y * yScale, 0), photo.size().height));
 }
     
+- (bool)drawLineFrom:(cv::Point)vertex to:(cv::Point)far in:(cv::Mat &)image withColor:(cv::Scalar)color {
+    double angle = atan2(vertex.y - far.y, vertex.x - far.x);
+    // Fingers should point upwards
+    if (0 > angle) {
+        cv::line(image, vertex, far, color);
+        return true;
+    } else {
+        return false;
+    }
+}
+    
 - (void)processImage:(cv::Mat &)image outputTo:(cv::Mat &)photo {
+    int fingerCount = 0;
     try {
         // MARK: - Fix Color
         cv::cvtColor(image, image, CV_RGBA2GRAY);
@@ -154,13 +176,13 @@ const cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cvSize(10, 1
             cv::Point far = largestContour[defect[2]];
             float distance = defect[3] / 256.0;
             // cv::line(photo, start, end, color);
-            cv::line(photo, end, far, color);
-            cv::line(photo, far, start, color);
-            cv::circle(photo, far, distance, color);
+            fingerCount += [self drawLineFrom:start to:far in:photo withColor:color] ? 1 : 0;
+            fingerCount += [self drawLineFrom:end to:far in:photo withColor:color] ? 1 : 0;
+            // cv::circle(photo, far, distance, color);
             std::cout << start << ',' << end << ',' << far << " - " << distance << std::endl;
         }
         std::cout << "\n\n" << std::endl;
-        // MARK: - Process Gesture
+        // TODO: - Process Gesture
     } catch (...) {
         // std::cout << e.what() << std::endl;
     }
@@ -173,6 +195,8 @@ const cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cvSize(10, 1
         ViewController *strongSelf = weakSelf;
         // Show the image.
         [strongSelf.imageView setImage:uiImage];
+        NSString *str = [[NSString alloc] initWithFormat:@"%d Fingers", fingerCount / 2];
+        [strongSelf.label setText: str];
     });
 }
     
