@@ -16,8 +16,6 @@
 const cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cvSize(10, 10));
 
 @interface ViewController ()
-    // Capture the video from back camera.
-    @property (nonatomic, retain) CvVideoCamera *videoCamera;
     // Display the transformed images.
     @property (nonatomic, weak) UIImageView *imageView;
     @property (nonatomic, retain) AVCaptureSession* captureSession;
@@ -54,6 +52,7 @@ const cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cvSize(10, 1
     [depthOutput setFilteringEnabled:YES];
     [self.captureSession addOutput:depthOutput];
     [self.captureSession commitConfiguration];
+    // Capture the video from back camera.
     [self.captureSession startRunning];
 }
     
@@ -76,7 +75,7 @@ const cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cvSize(10, 1
         cv::threshold(image, image,250, 255, CV_THRESH_BINARY);
         // Erode and dilate with mask and kernel to remove noise,
         // and save the result back to image.
-        // cv::morphologyEx(image, image, cv::MORPH_OPEN, kernel);
+        cv::morphologyEx(image, image, cv::MORPH_OPEN, kernel);
         // Find the largest contour (assuming that would be the hand).
         // Contour: connected area.
         std::vector<cv::Point> largestContour;
@@ -94,37 +93,37 @@ const cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cvSize(10, 1
             }
         }
         
-        // cv::approxPolyDP(largestContour, largestContour, 3, true);
+        cv::approxPolyDP(largestContour, largestContour, 3, true);
         
         cv::cvtColor(image, image, CV_GRAY2RGB);
         cv::Scalar color = cv::Scalar(255, 0, 0);
         cv::drawContours(image, contours, largestContourIndex, color);
         
         // Find a polygon around the hand.
-        std::vector<std::vector<cv::Point>> hulls(1);
+        std::vector<std::vector<int>> hulls(1);
         cv::convexHull(largestContour, hulls[0]);
+        std::vector<std::vector<cv::Point>> hullPoints(1);
+        cv::convexHull(largestContour, hullPoints[0]);
         
         color = cv::Scalar(0, 255, 0);
-        cv::drawContours(image, hulls, 0, color);
-        try {
-            // Finding the fingers.
-            std::vector<std::vector<cv::Vec4i>> defects(1);
-            cv::convexityDefects(largestContour, hulls[0], defects[0]);
-            color = cv::Scalar(0, 0, 255);
-            for (cv::Vec4i defect : defects[0]) {
-                cv::Point start = hulls[0][defect[0]];
-                cv::Point end = hulls[0][defect[1]];
-                cv::Point far = hulls[0][defect[2]];
-                float distance = defect[3] / 256.0;
-                cv::line(image, start, end, color);
-                cv::line(image, end, far, color);
-                cv::line(image, far, start, color);
-                cv::circle(image, far, distance, color);
-            }
-        } catch (std::exception& e) {
-            std::cout << e.what() << std::endl;
+        cv::drawContours(image, hullPoints, 0, color);
+        
+        // Finding the fingers.
+        std::vector<std::vector<cv::Vec4i>> defects(1);
+        cv::convexityDefects(largestContour, hulls[0], defects[0]);
+        color = cv::Scalar(0, 0, 255);
+        for (cv::Vec4i defect : defects[0]) {
+            cv::Point start = largestContour[defect[0]];
+            cv::Point end = largestContour[defect[1]];
+            cv::Point far = largestContour[defect[2]];
+            float distance = defect[3] / 256.0;
+            cv::line(image, start, end, color);
+            cv::line(image, end, far, color);
+            cv::line(image, far, start, color);
+            cv::circle(image, far, distance, color);
         }
     } catch (std::exception& e) {
+        std::cout << e.what() << std::endl;
     }
     // MARK: Display
     // Convert to displayable image.
