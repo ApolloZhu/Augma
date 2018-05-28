@@ -8,11 +8,10 @@
 
 #import <opencv2/opencv.hpp>
 #import <opencv2/imgcodecs/ios.h>
-#import <opencv2/video/background_segm.hpp>
-#import <opencv2/videoio/cap_ios.h>
 #import <UIKit/UIKit.h>
 
-@interface ViewController : UIViewController<AVCaptureDepthDataOutputDelegate, AVCaptureVideoDataOutputSampleBufferDelegate>
-
+@interface ViewController :
+    UIViewController<
+    AVCaptureDepthDataOutputDelegate,
+    AVCaptureVideoDataOutputSampleBufferDelegate>
 @end
-

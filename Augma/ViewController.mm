@@ -21,7 +21,7 @@ const cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cvSize(10, 1
     @property (nonatomic, retain) UILabel *label;
     @property (nonatomic, retain) AVCaptureSession *captureSession;
     @property (nonatomic, retain) AVCapturePhotoOutput *photoOutput;
-    @end
+@end
 
 @implementation ViewController {
     cv::Mat photo;
@@ -35,17 +35,25 @@ const cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cvSize(10, 1
     self.imageView = [[UIImageView alloc] initWithFrame:self.view.bounds];
     [self.view addSubview:self.imageView];
     self.imageView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    self.label = [[UILabel alloc] init];
-    [self.view addSubview:self.label];
-    [self.label setTranslatesAutoresizingMaskIntoConstraints:false];
-    [self.label setTextAlignment:NSTextAlignmentCenter];
+    UIVisualEffect *effect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleDark];
+    UIVisualEffectView *background = [[UIVisualEffectView alloc] initWithEffect: effect];
+    [self.view addSubview:background];
+    [background setTranslatesAutoresizingMaskIntoConstraints:NO];
+    [background.layer setCornerRadius:10];
+    [background.layer setMasksToBounds:YES];
+    NSArray<NSLayoutConstraint *> *constraints =
+    @[[background.widthAnchor constraintEqualToConstant:200],
+      [background.heightAnchor constraintEqualToConstant:50],
+      [background.centerXAnchor constraintEqualToAnchor:self.view.centerXAnchor],
+      [background.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor]];
+    [NSLayoutConstraint activateConstraints: constraints];
+    self.label = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 200, 50)];
+    [background.contentView addSubview:self.label];
     [self.label setTextColor:UIColor.whiteColor];
     [self.label setFont:[UIFont preferredFontForTextStyle:UIFontTextStyleLargeTitle]];
-    [NSLayoutConstraint activateConstraints:@[
-        [self.view.widthAnchor constraintEqualToAnchor:self.label.widthAnchor],
-        [self.view.centerXAnchor constraintEqualToAnchor:self.label.centerXAnchor],
-        [self.view.safeAreaLayoutGuide.topAnchor constraintEqualToAnchor:self.label.topAnchor],
-    ]];
+    [self.label setMinimumScaleFactor:0.5];
+    [self.label setTextAlignment:NSTextAlignmentCenter];
+    [self.label setText:@"Loading..."];
     
     // MARK: Select a depth-capable capture device
     AVCaptureDevice *videoDevice = [AVCaptureDevice
@@ -112,6 +120,17 @@ const cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cvSize(10, 1
         return true;
     } else {
         return false;
+    }
+}
+    
+- (void)updateFingerCountTo:(int) num {
+    if (num <= 0) {
+        [self.label setText:@"Not Found"];
+    } else if (num == 1) {
+        [self.label setText:@"1 Finger"];
+    } else {
+        NSString *str = [[NSString alloc] initWithFormat:@"%d Fingers", num];
+        [self.label setText: str];
     }
 }
     
@@ -195,9 +214,8 @@ const cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cvSize(10, 1
         ViewController *strongSelf = weakSelf;
         // Show the image.
         [strongSelf.imageView setImage:uiImage];
-        NSString *str = [[NSString alloc] initWithFormat:@"%d Fingers", fingerCount / 2];
-        [strongSelf.label setText: str];
+        [strongSelf updateFingerCountTo:fingerCount / 2];
     });
 }
-    
-    @end
+
+@end
