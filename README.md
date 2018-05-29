@@ -16,15 +16,15 @@ Identification of the hand will be based on color range, which (optionally) the 
 
 Based on the standards of [ManoMotion](https://www.manomotion.com/), a mature SDK provider that **supposedly** provides a similar SDK, the ultimate final product should be able to identify:
 
-- [ ] Hand Presence
-- [ ] Fingertips
-- [ ] Palm Center
-- [ ] Hand Contour
+- [x] Hand Presence
+- [x] Fingertips
+- [x] Palm Center
+- [x] Hand Contour
 - [ ] Inner Points
-- [ ] Detailed Hand Pose Information
+- [x] Detailed Hand Pose Information
 - [ ] Built-in gesture Recognition
-- [ ] One Hand (either L or R)
-- [ ] Skeleton
+- [x] One Hand (either L or R)
+- [x] Skeleton
 - [ ] Custom gestures
 - [ ] Two hands
 
@@ -68,9 +68,15 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ```
 
+### App Icon Components
+
+<div>Part of the icon, made by <a href="https://www.flaticon.com/authors/pixel-perfect" title="Pixel perfect">Pixel perfect</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a>, is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>
+
+Another part of the icon is licensed by **DEVELOPER ARTWORK LICENSE AGREEMENT FOR ARKIT** of **APPLE INC.**.
+
 ----
 
-2018/03/09 Ver. (Update May 2)
+2018/03/09 Ver. (Update May 28)
 
 <script type="text/javascript">
   window.onload = function () {
