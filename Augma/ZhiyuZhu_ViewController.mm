@@ -6,7 +6,7 @@
 //  Copyright © 2018 Augma. All rights reserved.
 //
 
-#import "ViewController.h"
+#import "ZhiyuZhu_ViewController.h"
 
 /* Use this pattern to match pixels: [
  [0, 1, 0],

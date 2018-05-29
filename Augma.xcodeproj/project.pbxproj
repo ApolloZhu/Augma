@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		527F2E8D20A1D759006BC0E0 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 527F2E8C20A1D759006BC0E0 /* AppDelegate.m */; };
-		527F2E9020A1D759006BC0E0 /* ViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 527F2E8F20A1D759006BC0E0 /* ViewController.mm */; };
+		527F2E9020A1D759006BC0E0 /* ZhiyuZhu_ViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 527F2E8F20A1D759006BC0E0 /* ZhiyuZhu_ViewController.mm */; };
 		527F2E9320A1D759006BC0E0 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 527F2E9120A1D759006BC0E0 /* Main.storyboard */; };
 		527F2E9520A1D75B006BC0E0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 527F2E9420A1D75B006BC0E0 /* Assets.xcassets */; };
 		527F2E9820A1D75B006BC0E0 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 527F2E9620A1D75B006BC0E0 /* LaunchScreen.storyboard */; };
@@ -22,8 +22,8 @@
 		527F2E8820A1D759006BC0E0 /* Augma.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Augma.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		527F2E8B20A1D759006BC0E0 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		527F2E8C20A1D759006BC0E0 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
-		527F2E8E20A1D759006BC0E0 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
-		527F2E8F20A1D759006BC0E0 /* ViewController.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ViewController.mm; sourceTree = "<group>"; };
+		527F2E8E20A1D759006BC0E0 /* ZhiyuZhu_ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZhiyuZhu_ViewController.h; sourceTree = "<group>"; };
+		527F2E8F20A1D759006BC0E0 /* ZhiyuZhu_ViewController.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ZhiyuZhu_ViewController.mm; sourceTree = "<group>"; };
 		527F2E9220A1D759006BC0E0 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		527F2E9420A1D75B006BC0E0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		527F2E9720A1D75B006BC0E0 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -70,8 +70,8 @@
 		527F2E8A20A1D759006BC0E0 /* Augma */ = {
 			isa = PBXGroup;
 			children = (
-				527F2E8E20A1D759006BC0E0 /* ViewController.h */,
-				527F2E8F20A1D759006BC0E0 /* ViewController.mm */,
+				527F2E8E20A1D759006BC0E0 /* ZhiyuZhu_ViewController.h */,
+				527F2E8F20A1D759006BC0E0 /* ZhiyuZhu_ViewController.mm */,
 				527F2E9120A1D759006BC0E0 /* Main.storyboard */,
 				527F2EA120A1D7D4006BC0E0 /* Supporting Files */,
 			);
@@ -173,7 +173,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				527F2E9020A1D759006BC0E0 /* ViewController.mm in Sources */,
+				527F2E9020A1D759006BC0E0 /* ZhiyuZhu_ViewController.mm in Sources */,
 				527F2E9B20A1D75B006BC0E0 /* main.m in Sources */,
 				527F2E8D20A1D759006BC0E0 /* AppDelegate.m in Sources */,
 			);
