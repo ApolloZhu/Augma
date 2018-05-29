@@ -25,8 +25,8 @@ Based on the standards of [ManoMotion](https://www.manomotion.com/), a mature SD
 - [ ] *Detailed Hand Pose Information*
 - [ ] Built-in gesture Recognition
 - [ ] Custom gestures
-<del>- [ ] Inner Points</del>
-<del>- [ ] Two hands</del>
+- [ ] <del>Inner Points</del>
+- [ ] <del>Two hands</del>
 
 ## External Resources
 
