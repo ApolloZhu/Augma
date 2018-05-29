@@ -17,16 +17,16 @@ Identification of the hand will be based on color range, which (optionally) the 
 Based on the standards of [ManoMotion](https://www.manomotion.com/), a mature SDK provider that **supposedly** provides a similar SDK, the ultimate final product should be able to identify:
 
 - [x] Hand Presence
-- [x] Fingertips
-- [x] Palm Center
-- [x] Hand Contour
-- [ ] Inner Points
-- [x] Detailed Hand Pose Information
-- [ ] Built-in gesture Recognition
 - [x] One Hand (either L or R)
+- [x] Hand Contour
 - [x] Skeleton
+- [x] Fingertips
+- [ ] *Palm Center*
+- [ ] *Detailed Hand Pose Information*
+- [ ] Built-in gesture Recognition
 - [ ] Custom gestures
-- [ ] Two hands
+<del>- [ ] Inner Points</del>
+<del>- [ ] Two hands</del>
 
 ## External Resources
 
