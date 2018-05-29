@@ -2,14 +2,6 @@
 
 This is an ambitious project that implements Augma, an imaginary device depicted in [*Sword Art Online The Movie: Ordinal Scale*](http://sao-movie.net/us/) which integrates augmented reality into everyday life activities. There already exists such devices like [Google Glass](https://www.x.company/glass/) and Microsoft [HoloLens](https://www.microsoft.com/en-us/hololens), however too expensive for normal customers. The goal of this project is to achieve similar functionalities as a software running on ARKit compatible iPhones (iOS 11, A9 or later processor) alone, without the help of any external sensors.
 
-## Compilation Guide
-
-1. Download [Xcode from Mac App Store](https://itunes.apple.com/us/app/xcode/id497799835). You must use a Mac.
-2. Double click to open `Augma.xcodeporj`
-3. Click the button with triangle on the top left corner to run, fix codesign issue as prompted by Xcode. This is required due to the codesign requirements of iOS.
-4. In case if Xcode doesn't provide instructions for codesigning the app, select "Augma" with blue icon on the left navigation panel, the select the "Augma" under "TARGETS" with a purple icon, then under "Signing," change the Team from "None" to your personal team. You may be asked to sign into your Apple ID.
-5. Allow the app to access camera, make sure you have dual cameras, and enjoy. The app will tell you how many fingers are present.
-
 ## License
 
 ```
