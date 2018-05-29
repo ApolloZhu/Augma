@@ -29,6 +29,16 @@ const cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cvSize(10, 1
     float yScale;
 }
     
+- (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+    [[UIApplication sharedApplication] setIdleTimerDisabled:YES];
+}
+    
+- (void)viewDidDisappear:(BOOL)animated {
+    [super viewDidDisappear:animated];
+    [[UIApplication sharedApplication] setIdleTimerDisabled:NO];
+}
+    
 - (void)viewDidLoad {
     [super viewDidLoad];
     // MARK: Layout Contents
@@ -113,9 +123,10 @@ const cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cvSize(10, 1
 }
     
 - (bool)drawLineFrom:(cv::Point)vertex to:(cv::Point)far in:(cv::Mat &)image withColor:(cv::Scalar)color {
+    // Direction of finger
     double angle = atan2(vertex.y - far.y, vertex.x - far.x);
-    // Fingers should point upwards
-    if (0 > angle) {
+    #warning criteria should base on device orientation
+    if (0 > angle) { // Fingers point upwards
         cv::line(image, vertex, far, color);
         return true;
     } else {
@@ -182,9 +193,8 @@ const cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cvSize(10, 1
         // MARK: Draw convex hull with green
         color = cv::Scalar(0, 255, 0);
         cv::drawContours(photo, hullPoints, 0, color);
-        std::cout << '\n' << std::endl;
         
-        // MARK: - Find Fingers.
+        // MARK: - Find Fingers
         std::vector<std::vector<cv::Vec4i>> defects(1);
         cv::convexityDefects(largestContour, hulls[0], defects[0]);
         // MARK: Draw convexity defects with blue
@@ -193,17 +203,15 @@ const cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cvSize(10, 1
             cv::Point start = largestContour[defect[0]];
             cv::Point end = largestContour[defect[1]];
             cv::Point far = largestContour[defect[2]];
+            // Length of finger
             float distance = defect[3] / 256.0;
-            // cv::line(photo, start, end, color);
             fingerCount += [self drawLineFrom:start to:far in:photo withColor:color] ? 1 : 0;
             fingerCount += [self drawLineFrom:end to:far in:photo withColor:color] ? 1 : 0;
             // cv::circle(photo, far, distance, color);
-            std::cout << start << ',' << end << ',' << far << " - " << distance << std::endl;
         }
-        std::cout << "\n\n" << std::endl;
         // TODO: - Process Gesture
     } catch (...) {
-        // std::cout << e.what() << std::endl;
+        // Ignore the exceptions, and that's OK
     }
     // MARK: - Display
     // Convert to displayable image.
