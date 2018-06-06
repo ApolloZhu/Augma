@@ -17,10 +17,10 @@ const cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cvSize(10, 1
 
 @interface ViewController ()
     // Display the transformed images.
-    @property (nonatomic, retain) UIImageView *imageView;
-    @property (nonatomic, retain) UILabel *label;
-    @property (nonatomic, retain) AVCaptureSession *captureSession;
-    @property (nonatomic, retain) AVCapturePhotoOutput *photoOutput;
+    @property (nonatomic) UIImageView *imageView;
+    @property (nonatomic) UILabel *label;
+    @property (nonatomic) AVCaptureSession *captureSession;
+    @property (nonatomic) AVCapturePhotoOutput *photoOutput;
 @end
 
 @implementation ViewController {
