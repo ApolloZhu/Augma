@@ -128,7 +128,7 @@ const cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cvSize(10, 1
     double angle = atan2(vertex.y - far.y, vertex.x - far.x);
     #warning criteria should base on device orientation
     if (0 > angle) { // Fingers point upwards
-        cv::line(image, vertex, far, color);
+        cv::line(image, vertex, far, color, LINE_WIDTH);
         return true;
     } else {
         return false;
@@ -181,11 +181,11 @@ const cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cvSize(10, 1
         for (int i = 0;i<largestContour.size();i++) {
             largestContour[i] = [self scaled:largestContour[i]];
         }
-        cv::drawContours(photo, contours, largestContourIndex, color);
+        cv::drawContours(photo, contours, largestContourIndex, color, LINE_WIDTH);
         
         // MARK: - Find Hand Boundary
         
-        // MARK: Find a polygon around the hand.
+        // MARK: Find a polygon around the hand
         std::vector<std::vector<int>> hulls(1);
         cv::convexHull(largestContour, hulls[0]);
         std::vector<std::vector<cv::Point>> hullPoints(1);
@@ -193,7 +193,7 @@ const cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cvSize(10, 1
         
         // MARK: Draw convex hull with green
         color = cv::Scalar(0, 255, 0);
-        cv::drawContours(photo, hullPoints, 0, color);
+        cv::drawContours(photo, hullPoints, 0, color, LINE_WIDTH);
         
         // MARK: - Find Fingers
         std::vector<std::vector<cv::Vec4i>> defects(1);
@@ -205,14 +205,14 @@ const cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cvSize(10, 1
             cv::Point end = largestContour[defect[1]];
             cv::Point far = largestContour[defect[2]];
             // Length of finger
-            float distance = defect[3] / 256.0;
+            #warning float distance = defect[3] / 256.0;
             fingerCount += [self drawLineFrom:start to:far in:photo withColor:color] ? 1 : 0;
             fingerCount += [self drawLineFrom:end to:far in:photo withColor:color] ? 1 : 0;
             // cv::circle(photo, far, distance, color);
         }
         // TODO: - Process Gesture
     } catch (...) {
-        // Ignore the exceptions, and that's OK
+        // Ignore all exceptions, and that's OK
     }
     // MARK: - Display
     // Convert to displayable image.

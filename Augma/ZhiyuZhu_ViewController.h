@@ -10,6 +10,8 @@
 #import <opencv2/imgcodecs/ios.h>
 #import <UIKit/UIKit.h>
 
+#define LINE_WIDTH 2
+
 @interface ViewController :
     UIViewController<
     AVCaptureDepthDataOutputDelegate,
