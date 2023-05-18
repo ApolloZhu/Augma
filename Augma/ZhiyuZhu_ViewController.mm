@@ -66,12 +66,64 @@ const cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cvSize(10, 1
     [self.label setTextAlignment:NSTextAlignmentCenter];
     [self.label setText:@"Loading..."];
     
+    switch ([AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo]) {
+        case AVAuthorizationStatusAuthorized:
+            [self start];
+            break;
+        case AVAuthorizationStatusNotDetermined: {
+            [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted) {
+                if (granted) {
+                    [self start];
+                } else {
+                    NSLog(@"Why you not give us permission, sad");
+                }
+            }];
+            break;
+        }
+        case AVAuthorizationStatusRestricted:
+            NSLog(@"You can't even give us camera permission");
+            break;
+        case AVAuthorizationStatusDenied:
+            NSLog(@"You didn't give us camera permission");
+            break;
+    }
+}
+    
+- (void)start {
     // MARK: Select a depth-capable capture device
-    AVCaptureDevice *videoDevice = [AVCaptureDevice
-                                    defaultDeviceWithDeviceType:AVCaptureDeviceTypeBuiltInDualCamera
-                                    mediaType:AVMediaTypeVideo
-                                    position:AVCaptureDevicePositionBack];
-    AVCaptureDeviceInput *videoDeviceInput = [[AVCaptureDeviceInput alloc] initWithDevice:videoDevice error:NULL];
+     NSMutableArray<AVCaptureDeviceType> *deviceTypes =
+     [NSMutableArray arrayWithObject:AVCaptureDeviceTypeBuiltInDualCamera];
+    if (@available(iOS 13.0, *)) {
+        [deviceTypes addObject:AVCaptureDeviceTypeBuiltInDualWideCamera];
+        [deviceTypes addObject:AVCaptureDeviceTypeBuiltInUltraWideCamera];
+        [deviceTypes addObject:AVCaptureDeviceTypeBuiltInTripleCamera];
+    }
+    
+    AVCaptureDeviceDiscoverySession *deviceDiscoverySession =
+    [AVCaptureDeviceDiscoverySession
+     discoverySessionWithDeviceTypes:deviceTypes
+     mediaType:AVMediaTypeDepthData
+     position:AVCaptureDevicePositionBack];
+    
+    AVCaptureDevice *videoDevice;
+    if ([deviceDiscoverySession devices].count) {
+        NSLog(@"Devices found: %lu", [deviceDiscoverySession devices].count);
+        for (AVCaptureDevice *device in [deviceDiscoverySession devices]) {
+            if (device.activeDepthDataFormat) {
+                videoDevice = device;
+                break;
+            }
+        }
+    } else {
+        NSLog(@"No devices found");
+        return;
+    }
+    NSError *error;
+    AVCaptureDeviceInput *videoDeviceInput = [[AVCaptureDeviceInput alloc] initWithDevice:videoDevice error:&error];
+    if (error) {
+        NSLog(@"Failed to get video device input due to %@", error);
+        return;
+    }
     self.captureSession = [[AVCaptureSession alloc] init];
     [self.captureSession beginConfiguration];
     // MARK: Capture the video from back camera
@@ -89,7 +141,9 @@ const cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cvSize(10, 1
     [self.captureSession addOutput:depthOutput];
     
     [self.captureSession commitConfiguration];
-    [self.captureSession startRunning];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+        [self.captureSession startRunning];
+    });
 }
     
 - (void)captureOutput:(AVCaptureOutput *)output didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection {
